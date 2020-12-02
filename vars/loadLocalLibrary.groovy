@@ -4,7 +4,13 @@ import hudson.plugins.git.GitSCM
 def call(GitSCM scm, String libraryPath, String masterNode = 'master') {
 	node(masterNode) {
 		echo "Loading local shared library"
-		checkout scm
+		try {
+ 			checkout scm
+ 		}catch(Exception e){
+			deleteDir()
+ 			checkout scm
+ 		}
+
 
 		// Create new git repo inside jenkins subdirectory
 		sh("""cd ./$libraryPath && \
@@ -19,7 +25,6 @@ def call(GitSCM scm, String libraryPath, String masterNode = 'master') {
 				retriever: modernSCM([$class: 'GitSCMSource', remote: "$repoPath"]), 
 				changelog: false
 
-		deleteDir() // After loading the library we can clean the workspace
 		echo "Done loading shared library"
 	}
 }
