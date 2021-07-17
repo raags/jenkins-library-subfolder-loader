@@ -1,28 +1,30 @@
 #!groovy
 
-def call(String url, String credId, String libraryPath, String masterNode = 'master') {
-	
+def call(String gitURL, String branch, String credId, String libraryPath, String masterNode = 'master') {
+
 	def scm = [
 		$class: 'GitSCM',
-		branches: [[name: "master" ]],
+		branches: [[name: branch ]],
 		userRemoteConfigs: [[
 				credentialsId: credId,
-				url: url]]
+				url: gitURL]]
 		]
 
 	node(masterNode) {
 		echo "Loading shared library"
-		try {
- 			checkout scm
- 		}catch(Exception e){
-			deleteDir()
- 			checkout scm
- 		}
+    checkout scm
 
-		def repoPath = sh(returnStdout: true, script: 'pwd').trim()
+		// Create new git repo inside library directory
+		sh("""cd ./$libraryPath && \
+				(rm -rf .git || true) && \
+				git init && \
+				git add --all && \
+				git commit -m init
+		""")
+		def repoPath = sh(returnStdout: true, script: 'pwd').trim() + "/$libraryPath"
 
-		library identifier: 'local-lib@master', 
-				retriever: modernSCM([$class: 'GitSCMSource', remote: "$repoPath"]), 
+		library identifier: 'local-lib@master',
+				retriever: modernSCM([$class: 'GitSCMSource', remote: "$repoPath"]),
 				changelog: false
 
 		echo "Done loading shared library"
