@@ -6,8 +6,8 @@ def call(String url, String credId, String libraryPath, String masterNode = 'mas
 		$class: 'GitSCM',
 		branches: [[name: "master" ]],
 		userRemoteConfigs: [[
-				credentialsId: $credId,
-				url: $url]]
+				credentialsId: credId,
+				url: url]]
 		]
 
 	node(masterNode) {
