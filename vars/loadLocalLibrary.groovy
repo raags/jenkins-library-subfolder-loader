@@ -1,7 +1,15 @@
 #!groovy
-import hudson.plugins.git.GitSCM
 
-def call(GitSCM scm, String libraryPath, String masterNode = 'master') {
+def call(String url, String credId, String libraryPath, String masterNode = 'master') {
+	
+	def scm = [
+		$class: 'GitSCM',
+		branches: [[name: "master" ]],
+		userRemoteConfigs: [[
+				credentialsId: $credId,
+				url: $url]]
+		]
+
 	node(masterNode) {
 		echo "Loading local shared library"
 		try {
