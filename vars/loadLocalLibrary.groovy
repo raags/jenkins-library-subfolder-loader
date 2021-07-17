@@ -11,7 +11,7 @@ def call(String url, String credId, String libraryPath, String masterNode = 'mas
 		]
 
 	node(masterNode) {
-		echo "Loading local shared library"
+		echo "Loading shared library"
 		try {
  			checkout scm
  		}catch(Exception e){
@@ -19,15 +19,7 @@ def call(String url, String credId, String libraryPath, String masterNode = 'mas
  			checkout scm
  		}
 
-
-		// Create new git repo inside jenkins subdirectory
-		sh("""cd ./$libraryPath && \
-				(rm -rf .git || true) && \
-				git init && \
-				git add --all && \
-				git commit -m init
-		""")
-		def repoPath = sh(returnStdout: true, script: 'pwd').trim() + "/$libraryPath"
+		def repoPath = sh(returnStdout: true, script: 'pwd').trim()
 
 		library identifier: 'local-lib@master', 
 				retriever: modernSCM([$class: 'GitSCMSource', remote: "$repoPath"]), 
